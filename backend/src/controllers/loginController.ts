@@ -64,3 +64,19 @@ export const loginController = async( req: Request<{}, {}, loginRequestBody>, re
 		return res.status(500).json({message: "Internal Server Error"});
 	}
 }
+
+export const logoutController = async(req:any, res:Response):Promise<Response> => {
+	try {
+		res.cookie("tokennjeng", "", {
+			httpOnly:true,
+			secure: process.env.NODE_ENV !== "production",
+			sameSite: "strict",
+			maxAge: 0
+		})
+
+		return res.status(200).json({message: "Logout Successfully"})
+	} catch (error) {
+		return res.status(500).json({message: "Logout Failed"})
+	}
+}
+

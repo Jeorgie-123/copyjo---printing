@@ -1,12 +1,48 @@
 import { useState } from "react";
 import type {FC} from 'react';
+import { useAuthStore } from "../store/useAuthStore";
+import { toast } from 'react-hot-toast'
+import { useNavigate } from "react-router-dom";
 
 const LoginPageAdmin:FC = () => {
 
+	const navigate = useNavigate()
+
 	const [showPassword, setShowPassword] = useState<boolean>(false);
+
+	const [email, setEmail] = useState<string>("");
+	const [password, setPassword] = useState<string>("");
+
+	const {login, loading, error} = useAuthStore();
+
+	const validation = () => {
+		if(!email || !password){
+			return toast.error("All fields are required")
+		}
+		return true
+	}
+
+	const handleLogin = async (e:React.FormEvent) => {
+		e.preventDefault();
+		
+		const good = validation();
+		if(!good) return;
+
+		const success = await login(email, password)
+
+		if(success){
+			toast.success("Successfully Login")
+
+			setEmail("")
+			setPassword("")
+			navigate('/dashboard')
+		}
+	}
+
 	const togglePassword = (): void => {
 		setShowPassword(!showPassword)
 	}
+
   return (
     <div className="min-h-screen bg-[#5A3E28] flex justify-center items-center">
 			<div className="flex flex-col justify-center">
@@ -15,20 +51,24 @@ const LoginPageAdmin:FC = () => {
 					<p className="text-[#DFC9A9] text-center text-xs">Manage products, orders, and customer messages</p>
 				</div>
 				<div className="bg-white p-7 rounded-lg shadow-lg w-80 xl:mt-8 mt-6 space-y-4">
-					<form className="space-y-4">
+					<form className="space-y-4" onSubmit={handleLogin}>
 						<div className="flex flex-col space-y-2">	
 							<label className="text-xs text-[#5A3E28]">Email Address</label>
-							<input type="email" className="border border-[#F1E0C6] px-4 py-2 rounded-lg bg-[#FDFAF5] placeholder:text-gray-400 text-xs" placeholder="jeng@gmail.com"></input>
+							<input type="email" value={email} onChange={(e) => setEmail(e.target.value)}className="border border-[#F1E0C6] px-4 py-2 rounded-lg bg-[#FDFAF5] placeholder:text-gray-400 text-xs" placeholder="jeng@gmail.com"></input>
 						</div>
 
 						<div className="flex flex-col space-y-2 relative">	
 							<label className="text-xs text-[#5A3E28]">Password</label>
-							<input type={showPassword ? 'text' : "password"} className="border border-[#F1E0C6] px-4 py-2 rounded-lg bg-[#FDFAF5] placeholder:text-gray-400 text-xs" placeholder="**********"></input>
+							<input type={showPassword ? 'text' : "password"} value={password} onChange={(e) => setPassword(e.target.value)}className="border border-[#F1E0C6] px-4 py-2 rounded-lg bg-[#FDFAF5] placeholder:text-gray-400 text-xs" placeholder="**********"></input>
 							<button type="button" className="absolute right-3 top-6 text-xs text-[#ce9f7b]"onClick={togglePassword}>{showPassword ? "Hide" : "Show"}</button>
 						</div>
 
 						<div className="text-center">
-							<button className="bg-[#AC824D] py-3 w-full px-4 rounded-lg text-xs font-bold text-center text-white hover:bg-[#7e4e13] cursor-pointer transition duration-300">Login to Dashboard</button>
+							<button className="bg-[#AC824D] py-3 w-full px-4 rounded-lg text-xs font-bold text-center text-white hover:bg-[#7e4e13] cursor-pointer transition duration-300" disabled={loading}>{loading ? "Logging in...." : "Login to Dashboard"}</button>
+
+							{error && (
+								<p className="text-red-500 text-xs text-center mt-4">{error}</p>
+							)}
 						</div>
 					</form>
 

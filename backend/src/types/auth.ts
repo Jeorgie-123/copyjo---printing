@@ -1,3 +1,6 @@
+import { Request } from "express";
+
+
 export interface loginRequestBody {
     email: string;
     password: string;
@@ -25,4 +28,11 @@ export interface cookieOptions {
     secure:boolean,
     sameSite: 'strict' | 'lax' | 'none',
     maxAge: number
+}
+
+export interface AuthRequest extends Request {
+    adminId?: string
+    cookies: {
+        [key: string]: string;
+    };
 }
